@@ -1,0 +1,965 @@
+---
+title: "Employee Turnover Issues Project"
+author: "Priyajit Chowdhury"
+date: "03/03/2021"
+output:
+  word_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+### Importing data set into R as excel file ###
+
+### Employee number and employee count are not cosidered as they are not related and unique number ###
+
+
+```{r}
+library(readxl)
+Turnover_issues<- read_excel("D:/Project/WA_Fn-UseC_-HR-Employee-Attrition.xls",
+                             col_types = c("numeric", "text", "text",
+                                        "numeric", "text", "numeric", "numeric",
+                                        "text", "numeric",
+                                        "text", "numeric", "numeric", "numeric",
+                                        "text", "numeric", "text", "numeric",
+                                        "numeric", "numeric", "text", "text",   "numeric", "numeric",
+                                        "numeric", "numeric", "numeric",
+                                        "numeric", "numeric", "numeric",
+                                        "numeric", "numeric", "numeric",
+                                        "numeric"))
+
+```
+
+
+1. Finding missing values to avoid biased estimation and invalid conclusions
+
+
+```{r}
+sum(is.na(Turnover_issues))
+```
+
+
+2. Unclassing Dataset to remove information with equal name second argument  
+
+
+```{r}
+Turnover_issues_fac <- as.data.frame (unclass(Turnover_issues))
+```
+
+
+3. Dataset Structure
+
+
+```{r}
+str(Turnover_issues_fac)
+```
+
+
+### Converting different attributes ###
+
+4. Attrition where "Yes" as 1, otherwise 0
+
+
+```{r}
+Attrition_Data<-ifelse(Turnover_issues_fac$Attrition=="Yes","1","0")
+Turnover_issues_fac$Attrition<-Attrition_Data
+Turnover_issues_fac$Attrition<-as.factor(Turnover_issues_fac$Attrition)
+```
+
+
+5. Business travel 
+
+
+```{r}
+BusinessTravel<-Turnover_issues$BusinessTravel
+BusinessTravel_factor<-factor(BusinessTravel)
+str(BusinessTravel_factor)
+Turnover_issues_fac$BusinessTravel<-BusinessTravel_factor
+```
+
+
+6. Department
+
+
+```{r}
+Department<-Turnover_issues$Department
+Department_factor<-factor(Department)
+str(Department_factor)
+Turnover_issues_fac$Department<-Department_factor
+str(Turnover_issues_fac$Department)
+```
+
+
+7. Education Field
+
+
+```{r}
+EducationField<-Turnover_issues$EducationField
+EducationField_factor<-factor(EducationField)
+str(EducationField_factor)
+Turnover_issues_fac$EducationField<-EducationField_factor
+```
+
+
+8. Gender
+
+
+```{r}
+Gender<-Turnover_issues$Gender
+Gender_factor<-factor(Gender)
+str(Gender_factor)
+Turnover_issues_fac$Gender<-Gender_factor
+```
+
+
+9. Job Role
+
+
+```{r}
+JobRole<-Turnover_issues$JobRole
+JobRole_factor<-factor(JobRole)
+str(JobRole_factor)
+Turnover_issues_fac$JobRole<-JobRole_factor
+```
+
+
+10. MaritalStatus
+
+
+```{r}
+MaritalStatus<-Turnover_issues$MaritalStatus
+MaritalStatus_factor<-factor(MaritalStatus)
+str(MaritalStatus_factor)
+Turnover_issues_fac$MaritalStatus<-MaritalStatus_factor
+```
+
+
+11. Over18
+
+
+```{r}
+Over18<-Turnover_issues$Over18
+Over18_factor<-factor(Over18)
+str(Over18_factor)
+Turnover_issues_fac$Over18<-Over18_factor
+```
+
+
+12. OverTime where "Yes" as 1, otherwise 0
+
+
+```{r}
+Overtime_Data<-ifelse(Turnover_issues_fac$OverTime=="Yes","1","0")
+Turnover_issues_fac$OverTime<-Overtime_Data
+Turnover_issues_fac$OverTime<-as.factor(Turnover_issues_fac$OverTime)
+```
+
+
+13. Changing numeric variables to factor variables
+
+
+```{r}
+Turnover_issues_fac$StockOptionLevel<-as.factor(Turnover_issues_fac$StockOptionLevel)
+Turnover_issues_fac$Education<-as.factor(Turnover_issues_fac$Education)
+Turnover_issues_fac$EnvironmentSatisfaction<-as.factor(Turnover_issues_fac$EnvironmentSatisfaction)
+Turnover_issues_fac$JobInvolvement<-as.factor(Turnover_issues_fac$JobInvolvement)
+Turnover_issues_fac$JobLevel<-as.factor(Turnover_issues_fac$JobLevel)
+Turnover_issues_fac$JobSatisfaction<-as.factor(Turnover_issues_fac$JobSatisfaction)
+Turnover_issues_fac$TrainingTimesLastYear<-as.factor(Turnover_issues_fac$TrainingTimesLastYear)
+Turnover_issues_fac$WorkLifeBalance<-as.factor(Turnover_issues_fac$WorkLifeBalance)
+Turnover_issues_fac$NumCompaniesWorked<-as.factor(Turnover_issues_fac$NumCompaniesWorked)
+Turnover_issues_fac$PerformanceRating<-as.factor(Turnover_issues_fac$PerformanceRating)
+Turnover_issues_fac$RelationshipSatisfaction<-as.factor(Turnover_issues_fac$RelationshipSatisfaction)
+```
+
+
+14. Observing revised data structure  
+
+
+```{r}
+str(Turnover_issues_fac)
+```
+
+
+Summarization of Dataset
+
+
+```{r}
+summary(Turnover_issues_fac)
+```
+
+
+Observing top few outputs
+
+
+```{r}
+head(Turnover_issues_fac)
+```
+
+
+### Descriptive Analysis ###
+
+#A. Analyzing each variables #
+
+
+i. Age
+
+
+```{r}
+summary(Turnover_issues_fac$Age)
+```
+```{r}
+hist(Turnover_issues_fac$Age)
+```
+
+
+ii. Attrition
+
+
+```{r}
+summary(Turnover_issues_fac$Attrition)
+```
+
+```{r}
+plot(Turnover_issues_fac$Attrition)
+```
+
+
+iii. Business Travel
+
+
+```{r}
+summary(Turnover_issues_fac$BusinessTravel)
+```
+
+```{r}
+plot(Turnover_issues_fac$BusinessTravel)
+```
+
+
+iv. Daily rate
+
+
+```{r}
+summary(Turnover_issues_fac$DailyRate)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$DailyRate),main="Daily_Rate")
+```
+
+
+v. Department
+
+
+```{r}
+summary(Turnover_issues_fac$Department)
+```
+
+```{r}
+plot(Turnover_issues_fac$Department)
+```
+
+
+vi. Distance from home
+
+
+```{r}
+summary(Turnover_issues_fac$DistanceFromHome)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$DistanceFromHome), main="Distance_From_Home")
+```
+
+
+vii. Education 
+
+
+```{r}
+summary(Turnover_issues_fac$Education)
+```
+
+```{r}
+plot(Turnover_issues_fac$Education, main ="Education")
+```
+
+
+viii. Educationfield
+
+
+```{r}
+summary(Turnover_issues_fac$EducationField)
+```
+
+```{r}
+plot(Turnover_issues_fac$EducationField, main = "Education_Field")
+```
+
+
+ix. Environment Satisfaction
+
+
+```{r}
+summary(Turnover_issues_fac$EnvironmentSatisfaction)
+```
+
+```{r}
+plot(Turnover_issues_fac$EnvironmentSatisfaction, main="Environment_Satisfaction")
+```
+
+
+x. Gender
+
+
+```{r}
+summary(Turnover_issues_fac$Gender)
+```
+
+```{r}
+plot(Turnover_issues_fac$Gender, main="Gender")
+```
+
+
+xi. Hourly Rate
+
+
+```{r}
+summary(Turnover_issues_fac$HourlyRate)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$HourlyRate), main = "Hourly_Rate")
+```
+
+
+xii. Job involvement
+
+
+```{r}
+summary(Turnover_issues_fac$JobInvolvement)
+```
+
+```{r}
+plot(Turnover_issues_fac$JobInvolvement, main="Job_Involement")
+```
+
+
+xiii. Job Level
+
+
+```{r}
+summary(Turnover_issues_fac$JobLevel)
+```
+
+```{r}
+hist(Turnover_issues$JobLevel, main="Job_Level")
+```
+
+
+xiv. Job Role
+
+
+```{r}
+summary(Turnover_issues_fac$JobRole)
+```
+
+```{r}
+plot(Turnover_issues_fac$JobRole, main="Job_Role")
+```
+
+
+xv. Job Satisfaction
+
+
+```{r}
+summary(Turnover_issues_fac$JobSatisfaction)
+```
+
+```{r}
+plot(Turnover_issues_fac$JobSatisfaction, main= "Job_Satisfaction")
+```
+
+
+xvi. Marital Status
+
+
+```{r}
+summary(Turnover_issues_fac$MaritalStatus)
+```
+
+```{r}
+plot(Turnover_issues_fac$MaritalStatus, main="Marital_Status")
+```
+
+
+xvii. Monthly Income
+
+
+```{r}
+summary(Turnover_issues_fac$MonthlyIncome)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$MonthlyIncome), main = "Monthly_income")
+```
+
+
+xviii. Num Companies WOrked 
+
+
+```{r}
+summary(Turnover_issues_fac$NumCompaniesWorked)
+```
+
+```{r}
+plot(Turnover_issues_fac$NumCompaniesWorked, main="Num_Companies_Worked")
+```
+
+
+xix. Overtime
+
+
+```{r}
+summary(Turnover_issues_fac$OverTime)
+```
+
+```{r}
+plot(Turnover_issues_fac$OverTime, main="Over_Time")
+```
+
+
+xx. Percent Salary Hike
+
+
+```{r}
+summary(Turnover_issues_fac$PercentSalaryHike)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$PercentSalaryHike),main = "Percent_Salary_Hikes")
+```
+
+
+xxi. Performance Rating
+
+
+```{r}
+summary(Turnover_issues_fac$PerformanceRating)
+```
+
+```{r}
+plot(Turnover_issues_fac$PerformanceRating, main="Performance_Rating")
+```
+
+
+xxii.Relationship Satisfaction
+
+
+```{r}
+summary(Turnover_issues_fac$RelationshipSatisfaction)
+```
+
+```{r}
+plot(Turnover_issues_fac$RelationshipSatisfaction, main="Relationhsip_Satisfaction")
+```
+
+Standard hour input is 80 in all rows, so no analysis done 
+
+xxiii. Stock Option Level
+
+
+```{r}
+summary(Turnover_issues_fac$StockOptionLevel)
+```
+
+```{r}
+plot(Turnover_issues_fac$StockOptionLevel, main="Stock_OPtion_Level")
+```
+
+
+xiv. Total Working Years
+
+
+```{r}
+summary(Turnover_issues_fac$TotalWorkingYears)
+```
+
+Boxplot is used for better visualization
+
+
+```{r}
+boxplot(Turnover_issues_fac$TotalWorkingYears, main="Total_Working_Years")
+```
+
+
+xxv. Training Times Last Year
+
+
+```{r}
+summary(Turnover_issues_fac$TrainingTimesLastYear)
+```
+
+```{r}
+plot(Turnover_issues_fac$TrainingTimesLastYear, main = "Training_Times_Last_Year")
+```
+
+
+xxvi. Work Life Balance
+
+
+```{r}
+summary(Turnover_issues_fac$WorkLifeBalance)
+```
+
+```{r}
+plot(Turnover_issues_fac$WorkLifeBalance, main = "Work_Life_Balance")
+```
+
+
+xxvii. Years at company
+
+
+```{r}
+summary(Turnover_issues_fac$YearsAtCompany)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$YearsAtCompany), main = "Years_At_Company")
+```
+
+
+xxviii.Years in Current Role
+
+
+```{r}
+summary(Turnover_issues_fac$YearsInCurrentRole)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$YearsInCurrentRole),main = "Years_In_Current_Role")
+```
+
+
+xix.Years Since Last Promotion
+
+
+```{r}
+summary(Turnover_issues_fac$YearsSinceLastPromotion)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$YearsSinceLastPromotion),main="Years_Since_Last Promotion")
+```
+
+
+xxx. Years with Current Manager
+
+
+```{r}
+summary(Turnover_issues_fac$YearsWithCurrManager)
+```
+
+```{r}
+plot(density(Turnover_issues_fac$YearsWithCurrManager),main = "Years_With_Curr_Manager")
+```
+
+
+###B. Analyzing with two variables###
+
+#Used cat for concatenating output, cut to convert continuous variable age into categorical variable and break for grouping which started from 18 to highest60#
+
+
+
+```{r}
+Cat_Age<-cut(Turnover_issues_fac$Age, breaks = c(0,20,30,40,50,60), labels = c("20","30","40","50","60"))
+```
+
+
+#Used cat for concatenating output, cut to convert continuous variable Monthly Income into  categorical variable and break for grouping which started from 1009 to highest 19999#
+
+
+```{r}
+Cat_Monthly_Income<-cut(Turnover_issues_fac$MonthlyIncome, breaks = c(0,2000,4000,6000,8000,10000,12000,14000,16000,18000,20000), labels = c("2000","4000","6000","8000","10000","12000","14000","16000","18000","20000"))
+```
+
+
+#Used cat for concatenating output, cut to convert continuous variable Percent Salary Hike into categorical variable and break for grouping which started from 10 to highest 25#
+
+
+```{r}
+Cat_Percent_Salary_Hike<-cut(Turnover_issues_fac$PercentSalaryHike, breaks = c(10,15,20,25), labels = c("10-15","16-20","21-25"))
+```
+
+
+```{r}
+
+### The package "gmodels" need to be installed for utilizing CrossTable(...) function
+
+# install.packages("gmodels")
+library(gmodels)
+```
+
+
+1. Relationship of Age with Attrition
+
+
+```{r}
+CrossTable(Cat_Age,Turnover_issues_fac$Attrition)
+```
+
+
+2. Relationship of Business Travel with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$BusinessTravel,Turnover_issues_fac$Attrition)
+```
+
+
+3. Relationship of Monthly Income with Attrition
+
+
+```{r}
+CrossTable(Cat_Monthly_Income,Turnover_issues_fac$Attrition)
+```
+
+
+4. Relationship of department with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$Department,Turnover_issues_fac$Attrition)
+```
+
+
+5. Relationship of distance from home with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$DistanceFromHome,Turnover_issues_fac$Attrition)
+```
+
+
+6. Relationship of Education with attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$Education,Turnover_issues_fac$Attrition)
+```
+
+
+7. Relationship of Education Field with attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$EducationField,Turnover_issues_fac$Attrition)
+```
+
+
+8. Relationship of Environment Satisfaction with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$EnvironmentSatisfaction,Turnover_issues_fac$Attrition)
+```
+
+
+9. Relationship of Gender with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$Gender,Turnover_issues_fac$Attrition)
+```
+
+
+10. Relationship of Job Involvement with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$JobInvolvement,Turnover_issues_fac$Attrition)
+```
+
+
+11. Relationship of Job level with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$JobLevel,Turnover_issues_fac$Attrition)
+```
+
+
+12. Relationship of Percentage Job Role with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$JobRole,Turnover_issues_fac$Attrition)
+```
+
+
+13. Relationship of Job Satisfaction with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$JobSatisfaction,Turnover_issues_fac$Attrition)
+```
+
+
+14. Relationship of Marital status with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$MaritalStatus,Turnover_issues_fac$Attrition)
+```
+
+
+15. Relationship of number of companies worked with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$NumCompaniesWorked,Turnover_issues_fac$Attrition)
+```
+
+
+16. Relationship of overtime with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$OverTime,Turnover_issues_fac$Attrition)
+```
+
+
+17. Relationship of Percent Salary Hike with Attrition
+
+
+```{r}
+CrossTable(Cat_Percent_Salary_Hike,Turnover_issues_fac$Attrition)
+```
+
+
+18. Relationship of Performance rating with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$PerformanceRating,Turnover_issues_fac$Attrition)
+```
+
+
+19. Affect of Relationship Satisfactoin with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$RelationshipSatisfaction,Turnover_issues_fac$Attrition)
+```
+
+
+20. Relationship of Stock Option Level with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$StockOptionLevel,Turnover_issues_fac$Attrition)
+```
+
+
+21. Relationship of Total Working Years with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$TotalWorkingYears,Turnover_issues_fac$Attrition)
+```
+
+
+22. Relationship of Training Times Last Year with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$TrainingTimesLastYear,Turnover_issues_fac$Attrition)
+```
+
+
+23. Relationship of Work Life Balance with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$WorkLifeBalance,Turnover_issues_fac$Attrition)
+```
+
+
+24. Relationship of number of Years At Company with attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$YearsAtCompany,Turnover_issues_fac$Attrition)
+```
+
+
+25. Relationship of number of Years In Current Role with attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$YearsInCurrentRole,Turnover_issues_fac$Attrition)
+```
+
+
+26. Relationship of Years Since Last Promotion with Attrition
+
+
+```{r}
+CrossTable(Turnover_issues_fac$YearsSinceLastPromotion,Turnover_issues_fac$Attrition)
+```
+
+
+### Logistic Regressoin Model ###
+
+#set.seed() function is used for generating randoms numbers#
+
+#Looking for most significant variables with Attrition#
+
+1. Dividing Data set into Training (70%) and Test (30%) set to predict Attrition. It ensures the data sets are marginally different, and thus, it may find out better solution. 
+
+
+```{r}
+set.seed(1234)
+div <- sample(2, nrow(Turnover_issues_fac), replace = T, prob = c(0.7, 0.3))
+train <- Turnover_issues_fac[div==1,]
+test <- Turnover_issues_fac[div==2,]
+```
+
+
+2. Logistic Regression Model
+
+#Logistic regression is used to find out probability of event success and event failure by categorizing data into discrete classes#
+
+
+```{r}
+turnover_model <- glm(Attrition ~ Age+BusinessTravel+DailyRate+Department+DistanceFromHome+Education+EducationField+EnvironmentSatisfaction+Gender+HourlyRate+JobInvolvement+JobLevel+JobRole+JobSatisfaction+MaritalStatus+MonthlyIncome+NumCompaniesWorked+OverTime+PercentSalaryHike+PerformanceRating+RelationshipSatisfaction+StockOptionLevel+TotalWorkingYears+TrainingTimesLastYear+WorkLifeBalance+YearsAtCompany+YearsInCurrentRole+YearsSinceLastPromotion+YearsWithCurrManager, data = train, family = 'binomial')
+summary(turnover_model)
+```
+
+#Picking significant variables with p<0.05#
+
+#Age(-) #Business Travel(+) #Distance From Home(+) #Environment Satisfaction(-) #Job Involvement(-) #Job Level(-) #Job Role #Job Satisfaction(-) #NumCompaniesWorked(+) #Relationship Satisfaction(-) #Stock Option Level(-) #Work Life Balance(-) #Years At company(-) #Years In Current Role(-) #Years Since Last promotion(+) #Years With Curr Manager(-)
+
+#Retaining statistically significant variables#
+
+```{r}
+turnover_model <- glm(Attrition ~ Age+BusinessTravel+DistanceFromHome+EnvironmentSatisfaction+JobInvolvement+JobLevel+JobRole+JobSatisfaction+NumCompaniesWorked+OverTime+RelationshipSatisfaction+StockOptionLevel+WorkLifeBalance+YearsAtCompany+YearsInCurrentRole+YearsSinceLastPromotion+YearsWithCurrManager, data = train, family = 'binomial')
+summary(turnover_model)
+```
+
+### Prediction of associates leaving company ###
+
+
+```{r}
+prediction <- predict (turnover_model, train, type = 'response')
+head(prediction)
+```
+
+### Observing few top output to predict attrition of assocaites ###
+
+
+```{r}
+head(train)
+```
+
+### Confusion Matrix to find out misclassification error in training data ###
+
+
+```{r}
+predic1 <- ifelse(prediction>0.5, 1, 0)
+table1<-table(Predicted = predic1, Actual = train$Attrition)
+table1
+```
+
+Number of associates who do not quit job are 834. Here it is predicted and truly do not happen. Again, 98 associates is predicted to quit and really it's happened. Moreover, 26 associates predicted to quit, but it's not happen.  Furthermore, 84 associates predicted won't quit, but originally it's happened. 
+
+### Misclassification Percentage in training data ###
+
+
+```{r}
+1-sum(diag(table1))/sum(table1)
+```
+
+So it will be 10.56%
+
+### Measuring misclassification error of Test Data ###
+
+
+```{r}
+prediction1 <- predict(turnover_model, test, type = 'response')
+predic2 <- ifelse(prediction1>0.5, 1, 0)
+table2 <- table(Predicted = predic2, Actual = test$Attrition)
+table2
+```
+
+Number of associates who do not quit job are 353. Here it is predicted and truly do not happen. Again, 24 associates is predicted to quit and really it's happened. Moreover, 20 associates predicted to quit, but it's not happen.  Furthermore, 31 associates predicted won't quit, but originally it's happened.
+
+### Misclassification Percentage of test data ###
+
+```{r}
+1-sum(diag(table2))/sum(table2)
+```
+
+So it will be 11.91%
+
+### Finding satisfaction of staff ###
+
+
+1. Based on Environment Satisfaction
+
+
+```{r}
+plot(Turnover_issues_fac$EnvironmentSatisfaction)
+```
+
+```{r}
+median(as.numeric(Turnover_issues_fac$EnvironmentSatisfaction))
+```
+
+```{r}
+mean(as.numeric(Turnover_issues_fac$EnvironmentSatisfaction))
+```
+
+
+2. Based on Relationship Satisfaction
+
+
+```{r}
+plot(Turnover_issues_fac$RelationshipSatisfaction)
+```
+
+```{r}
+median(as.numeric(Turnover_issues_fac$RelationshipSatisfaction))
+```
+
+```{r}
+mean(as.numeric(Turnover_issues_fac$RelationshipSatisfaction))
+```
+
+
+3. Based on Job Satisfaction
+
+
+```{r}
+plot(Turnover_issues_fac$JobSatisfaction)
+```
+
+```{r}
+median(as.numeric(Turnover_issues_fac$JobSatisfaction))
+```
+
+```{r}
+mean(as.numeric(Turnover_issues_fac$JobSatisfaction))
+```
+
+Here, median is 3 out of 4 which is higher than mean 2.7 out of 4, so we can say that more than half of the associates have job satisfaction above average (2.7).
